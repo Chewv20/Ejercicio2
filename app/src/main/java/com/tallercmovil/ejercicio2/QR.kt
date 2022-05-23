@@ -68,7 +68,6 @@ class QR : AppCompatActivity(), ZXingScannerView.ResultHandler {
             }else if (scanResult.contains("vcard",true)){
                 Log.d("QR: ","Se leyo una VCARD")
             }else if (scanResult.contains("MSG",true)){
-                Log.d("QR: ","Se leyo un correo")
                 var i = ""
                 var tmp = 4
                 var tmp2 = 0
@@ -86,25 +85,14 @@ class QR : AppCompatActivity(), ZXingScannerView.ResultHandler {
                 }
                 var mail = scanResult.substring(tmp,tmp2)
                 var emails = arrayOf(mail)
+
                 var intent = Intent(Intent.ACTION_SENDTO)
                 intent.setType("*/*")
                 intent.setData(Uri.parse("mailto:"))
                 intent.putExtra(Intent.EXTRA_EMAIL,emails)
                 intent.putExtra(Intent.EXTRA_SUBJECT,"Prueba")
                 intent.putExtra(Intent.EXTRA_TEXT,"texto de prueba")
-                if (intent.resolveActivity(packageManager)!=null){
-                    startActivity(intent)
-                }else{
-                    AlertDialog.Builder(this@QR)
-                        .setTitle("Error")
-                        .setMessage("No se encontro aplicación de correo")
-                        .setPositiveButton("Aceptar", DialogInterface.OnClickListener { dialogInterface, i ->
-                            dialogInterface.dismiss()
-                            finish()
-                        })
-                        .create()
-                        .show()
-                }
+                startActivity(intent)
 
             }else if (scanResult.contains("sms",true)){
                 /*var caracteres = scanResult.length
