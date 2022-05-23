@@ -95,13 +95,15 @@ class QR : AppCompatActivity(), ZXingScannerView.ResultHandler {
                 startActivity(intent)
 
             }else if (scanResult.contains("sms",true)){
-                /*var caracteres = scanResult.length
-                var numero = scanResult.substring(0,15)
+                var caracteres = scanResult.length
+                var numero = scanResult.substring(6,15)
                 var mensaje = scanResult.substring(16,caracteres)
-                Log.d("QR_LEIDO2 ",numero)
-                Log.d("QR_LEIDO2 ",mensaje)
-                var uri = Uri.parse(numero)
-                startActivity(Intent(Intent.ACTION_SEND,uri))*/
+                Log.d("QR_LEIDO",numero)
+                var intent = Intent(Intent.ACTION_SENDTO)
+                intent.setType("text/plain")
+                intent.setData(Uri.parse("smsto:"))
+                intent.putExtra(Intent.EXTRA_PHONE_NUMBER,numero)
+                startActivity(intent)
             }else{
                 throw IllegalArgumentException("Código no válido")
             }
