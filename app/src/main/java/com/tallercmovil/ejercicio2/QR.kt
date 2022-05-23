@@ -17,7 +17,9 @@ import com.google.zxing.Result
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 import java.lang.IllegalArgumentException
 import java.net.MalformedURLException
+import java.net.URI
 import java.net.URL
+import java.util.logging.Level.parse
 
 class QR : AppCompatActivity(), ZXingScannerView.ResultHandler {
 
@@ -67,15 +69,51 @@ class QR : AppCompatActivity(), ZXingScannerView.ResultHandler {
                 Log.d("QR: ","Se leyo una VCARD")
             }else if (scanResult.contains("MSG",true)){
                 Log.d("QR: ","Se leyo un correo")
-            }else if (scanResult.contains("sms",true)){
-                var caracteres = scanResult.length
-                var mensaje = scanResult.substring(16,caracteres)
-                Log.d("QR_LEIDO2 ",mensaje)
-                val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("smsto:")
-                    putExtra("sms_body",mensaje)
-                    startActivity(intent)
+                var i = ""
+                var tmp = 4
+                var tmp2 = 0
+                for(i in scanResult){
+                    if(i.toString() == ":"){
+                        break
+                    }
+                    tmp++
                 }
+                for(i in scanResult){
+                    if(i.toString() == ";"){
+                        break
+                    }
+                    tmp2++
+                }
+                var mail = scanResult.substring(tmp,tmp2)
+                var emails = arrayOf(mail)
+                var intent = Intent(Intent.ACTION_SENDTO)
+                intent.setType("*/*")
+                intent.setData(Uri.parse("mailto:"))
+                intent.putExtra(Intent.EXTRA_EMAIL,emails)
+                intent.putExtra(Intent.EXTRA_SUBJECT,"Prueba")
+                intent.putExtra(Intent.EXTRA_TEXT,"texto de prueba")
+                if (intent.resolveActivity(packageManager)!=null){
+                    startActivity(intent)
+                }else{
+                    AlertDialog.Builder(this@QR)
+                        .setTitle("Error")
+                        .setMessage("No se encontro aplicación de correo")
+                        .setPositiveButton("Aceptar", DialogInterface.OnClickListener { dialogInterface, i ->
+                            dialogInterface.dismiss()
+                            finish()
+                        })
+                        .create()
+                        .show()
+                }
+
+            }else if (scanResult.contains("sms",true)){
+                /*var caracteres = scanResult.length
+                var numero = scanResult.substring(0,15)
+                var mensaje = scanResult.substring(16,caracteres)
+                Log.d("QR_LEIDO2 ",numero)
+                Log.d("QR_LEIDO2 ",mensaje)
+                var uri = Uri.parse(numero)
+                startActivity(Intent(Intent.ACTION_SEND,uri))*/
             }else{
                 throw IllegalArgumentException("Código no válido")
             }
