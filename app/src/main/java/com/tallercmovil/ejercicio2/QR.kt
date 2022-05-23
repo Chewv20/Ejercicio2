@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.zxing.Result
 import me.dm7.barcodescanner.zxing.ZXingScannerView
+import java.lang.IllegalArgumentException
 import java.net.MalformedURLException
 import java.net.URL
 
@@ -51,17 +52,34 @@ class QR : AppCompatActivity(), ZXingScannerView.ResultHandler {
 
     override fun handleResult(p0: Result?) {
         //código QR leído
-        val scanResult = p0?.text
+        var scanResult = p0?.text
 
         Log.d("QR_LEIDO", scanResult!!)
 
         try{
-            val url = URL(scanResult)
-            val i = Intent(Intent.ACTION_VIEW)
-            i.setData(Uri.parse(scanResult))
-            startActivity(i)
-            finish()
-        }catch(e: MalformedURLException){
+            if(scanResult.contains("http",true)){
+                val url = URL(scanResult)
+                val i = Intent(Intent.ACTION_VIEW)
+                i.setData(Uri.parse(scanResult))
+                startActivity(i)
+                finish()
+            }else if (scanResult.contains("vcard",true)){
+                Log.d("QR: ","Se leyo una VCARD")
+            }else if (scanResult.contains("MSG",true)){
+                Log.d("QR: ","Se leyo un correo")
+            }else if (scanResult.contains("sms",true)){
+                var caracteres = scanResult.length
+                var mensaje = scanResult.substring(16,caracteres)
+                Log.d("QR_LEIDO2 ",mensaje)
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("smsto:")
+                    putExtra("sms_body",mensaje)
+                    startActivity(intent)
+                }
+            }else{
+                throw IllegalArgumentException("Código no válido")
+            }
+        }catch(e: IllegalArgumentException){
             AlertDialog.Builder(this@QR)
                 .setTitle("Error")
                 .setMessage("El código QR no es válido para la aplicación")
